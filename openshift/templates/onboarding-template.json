@@ -1,0 +1,229 @@
+{
+  "kind": "Template",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "onboarding",
+    "annotations": {
+      "description": "The onboarding service",
+      "iconClass": "icon-python",
+      "tags": "microservice,python"
+    }
+  },
+  "labels": {
+    "application": "onboarding",
+    "hystrix.enabled": "true"
+  },
+  "parameters": [
+    {
+      "displayName": "Application name",
+      "name": "APPLICATION_NAME",
+      "value": "onboarding"
+    },
+    {
+      "description": "Git source URI for application",
+      "displayName": "Git repository",
+      "name": "GIT_URI",
+      "value": "https://github.com/lapd-viosoft/test",
+      "required": true
+    },
+    {
+      "displayName": "Git branch/tag",
+      "name": "GIT_REF",
+      "value": "master",
+      "required": true
+    }
+  ],
+  "objects": [
+    {
+      "kind": "ImageStream",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME}"
+      },
+      "spec": {
+        "tags": [
+          {
+            "name": "latest"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "BuildConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME}"
+      },
+      "spec": {
+        "source": {
+          "type": "Git",
+          "git": {
+            "uri": "${GIT_URI}",
+            "ref": "${GIT_REF}"
+          },
+          "contextDir": "onboarding-service"
+        },
+        "strategy": {
+          "type": "Docker",
+          "dockerStrategy": {
+            "from": {
+              "dockerfilePath": "Dockerfile"
+            },
+            "incremental" : true,
+            "forcePull": true
+          }
+        },
+        "output": {
+          "to": {
+            "kind": "ImageStreamTag",
+            "name": "${APPLICATION_NAME}:latest"
+          }
+        }
+      }
+    },
+    {
+      "kind": "DeploymentConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME}"
+      },
+      "spec": {
+        "strategy": {
+          "type": "Recreate",
+          "resources": {}
+        },
+        "triggers": [
+          {
+            "type": "ImageChange",
+            "imageChangeParams": {
+              "automatic": true,
+              "containerNames": [
+                "${APPLICATION_NAME}"
+              ],
+              "from": {
+                "kind": "ImageStreamTag",
+                "name": "${APPLICATION_NAME}:latest"
+              }
+            }
+          },
+          {
+            "type": "ConfigChange"
+          }
+        ],
+        "replicas": 1,
+        "selector": {
+          "deploymentConfig": "${APPLICATION_NAME}"
+        },
+        "template": {
+          "metadata": {
+            "name": "${APPLICATION_NAME}",
+            "labels": {
+              "deploymentConfig": "${APPLICATION_NAME}",
+              "application": "${APPLICATION_NAME}"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "${APPLICATION_NAME}",
+                "image": "${APPLICATION_NAME}",
+                "ports": [
+                  {
+                    "name": "http",
+                    "containerPort": 9090,
+                    "protocol": "TCP"
+                  }
+                ],
+                "env": [
+                  {
+                    "name": "OPENSHIFT_KUBE_PING_LABELS",
+                    "value": "application=${APPLICATION_NAME}"
+                  },
+                  {
+                    "name": "OPENSHIFT_KUBE_PING_NAMESPACE",
+                    "valueFrom": {
+                      "fieldRef": {
+                        "fieldPath": "metadata.namespace"
+                      }
+                    }
+                  },
+
+                  {
+                    "name": "AUTO_DEPLOY_EXPLODED",
+                    "value": "false"
+                  }
+
+                ],
+                "resources": {
+                    "limits": {
+                        "cpu": "1500m",
+                        "memory": "2Gi"
+                    },
+                    "requests": {
+                        "cpu": "200m",
+                        "memory": "1Gi"
+                    }
+                },
+                "lifecycle": {
+                  "preStop": {
+                    "exec": {
+                      "command": [
+                        "echo Helloworld"
+                      ]
+                    }
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "imagePullPolicy": "Always"
+              }
+            ],
+            "restartPolicy": "Always",
+            "terminationGracePeriodSeconds": 75,
+            "dnsPolicy": "ClusterFirst",
+            "securityContext": {}
+          }
+        }
+      }
+    },
+    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME}",
+        "annotations": {
+          "description": "The onboarding service's http port.",
+          "service.alpha.openshift.io/dependencies": "[{\"name\":\"${APPLICATION_NAME}-postgresql\",\"namespace\":\"\",\"kind\":\"Service\"}]"
+        }
+      },
+      "spec": {
+        "ports": [
+          {
+            "protocol": "TCP",
+            "port": 9090,
+            "targetPort": 9090
+          }
+        ],
+        "selector": {
+          "deploymentConfig": "${APPLICATION_NAME}"
+        }
+      }
+    },
+    {
+        "kind": "Route",
+        "apiVersion": "v1",
+        "metadata": {
+            "name": "${APPLICATION_NAME}"
+        },
+        "spec": {
+            "to": {
+                "kind": "Service",
+                "name": "${APPLICATION_NAME}",
+                "weight": 100
+            },
+            "port": {
+                "targetPort": 9090
+            }
+        }
+    }
+  ]
+}

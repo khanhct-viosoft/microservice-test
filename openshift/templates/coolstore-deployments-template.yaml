@@ -1,0 +1,98 @@
+apiVersion: v1
+kind: Template
+labels:
+  demo: coolstore-microservice
+metadata:
+  annotations:
+    description: CoolStore demo microservices deployments persistent template
+    iconClass: icon-java
+    tags: microservice,jboss,spring
+  name: coolstore-deployments
+objects:
+- apiVersion: v1
+  groupNames: null
+  kind: RoleBinding
+  metadata:
+    name: default_edit
+  roleRef:
+    name: view
+  subjects:
+  - kind: ServiceAccount
+    name: default
+# Onboarding Service
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: onboarding
+    labels:
+      application: onboarding
+  spec:
+    replicas: 1
+    selector:
+      deploymentconfig: onboarding
+    strategy:
+      resources: {}
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          application: onboarding
+          deploymentconfig: onboarding
+        name: onboarding
+      spec:
+        containers:
+        - env:
+          - name: OPENSHIFT_KUBE_PING_LABELS
+            value: application=onboarding
+          - name: OPENSHIFT_KUBE_PING_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          image: onboarding
+          imagePullPolicy: Always
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - echo Hello
+          name: onboarding
+          ports:
+          - containerPort: 9090
+            name: http
+            protocol: TCP
+          resources:
+            limits:
+              cpu: 1
+              memory: 1Gi
+            requests:
+              cpu: 50m
+              memory: 512Mi
+          terminationMessagePath: /dev/termination-log
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 75
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - onboarding
+        from:
+          kind: ImageStreamTag
+          name: onboarding:${APP_VERSION}
+      type: ImageChange
+    - type: ConfigChange
+parameters:
+- description: CoolStore application image version to be deployed (imagestreams should exist)
+  displayName: CoolStore image version
+  name: APP_VERSION
+  required: true
+  value: latest
+- description: Hostname suffix used for routes e.g. cart-<HOSTNAME_SUFFIX> onboarding-<HOSTNAME_SUFFIX>
+  displayName: Hostname suffix used for routes
+  name: HOSTNAME_SUFFIX
+  required: true
+- description: Decision Server Coolstore Rules Container Spec
+  name: KIE_CONTAINER_DEPLOYMENT
+  required: true
+  value: CoolStoreRulesContainer=com.redhat:coolstore:2.0.0
