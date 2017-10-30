@@ -361,7 +361,7 @@ function scale_down_deployments() {
 
 # Deploy Coolstore into Coolstore TEST project
 function deploy_coolstore_test_env() {
-  local _TEMPLATE="https://raw.githubusercontent.com/$GITHUB_ACCOUNT/test/$GITHUB_REF/openshift/templates/coolstore-deployments-template.yaml"
+  local _TEMPLATE="https://raw.githubusercontent.com/$GITHUB_ACCOUNT/microservice-test/$GITHUB_REF/openshift/templates/coolstore-deployments-template.yaml"
 
   echo_header "Deploying CoolStore app into $PRJ_COOLSTORE_TEST project..."
   echo "Using deployment template $_TEMPLATE_DEPLOYMENT"
@@ -377,8 +377,8 @@ function deploy_coolstore_test_env() {
 
 # Deploy Coolstore into Coolstore PROD project
 function deploy_coolstore_prod_env() {
-  local _TEMPLATE_DEPLOYMENT="https://raw.githubusercontent.com/$GITHUB_ACCOUNT/test/$GITHUB_REF/openshift/templates/coolstore-deployments-template.yaml"
-  local _TEMPLATE_BLUEGREEN="https://raw.githubusercontent.com/$GITHUB_ACCOUNT/test/$GITHUB_REF/openshift/templates/inventory-bluegreen-template.yaml"
+  local _TEMPLATE_DEPLOYMENT="https://raw.githubusercontent.com/$GITHUB_ACCOUNT/microservice-test/$GITHUB_REF/openshift/templates/coolstore-deployments-template.yaml"
+  local _TEMPLATE_BLUEGREEN="https://raw.githubusercontent.com/$GITHUB_ACCOUNT/microservice-test/$GITHUB_REF/openshift/templates/inventory-bluegreen-template.yaml"
 
   echo_header "Deploying CoolStore app into $PRJ_COOLSTORE_PROD project..."
   echo "Using deployment template $_TEMPLATE_DEPLOYMENT"
@@ -400,7 +400,7 @@ function deploy_coolstore_prod_env() {
 
 # Deploy Onboarding service into Onboarding DEV project
 function deploy_onboarding_dev_env() {
-  local _TEMPLATE="https://raw.githubusercontent.com/$GITHUB_ACCOUNT/test/$GITHUB_REF/openshift/templates/onboarding-template.json"
+  local _TEMPLATE="https://raw.githubusercontent.com/$GITHUB_ACCOUNT/microservice-test/$GITHUB_REF/openshift/templates/onboarding-template.json"
 
   echo_header "Deploying Onboarding service into $PRJ_INVENTORY project..."
   echo "Using template $_TEMPLATE"
@@ -464,7 +464,7 @@ function deploy_pipeline() {
   echo_header "Configuring CI/CD..."
 
   local _PIPELINE_NAME=inventory-pipeline
-  local _TEMPLATE=https://raw.githubusercontent.com/$GITHUB_ACCOUNT/test/$GITHUB_REF/openshift/templates/onboarding-pipeline-template.yaml
+  local _TEMPLATE=https://raw.githubusercontent.com/$GITHUB_ACCOUNT/microservice-test/$GITHUB_REF/openshift/templates/onboarding-pipeline-template.yaml
 
   oc process -f $_TEMPLATE -v PIPELINE_NAME=$_PIPELINE_NAME -v DEV_PROJECT=$PRJ_INVENTORY -v TEST_PROJECT=$PRJ_COOLSTORE_TEST -v PROD_PROJECT=$PRJ_COOLSTORE_PROD -v GENERIC_WEBHOOK_SECRET=$WEBHOOK_SECRET -n $PRJ_CI | oc create -f - -n $PRJ_CI
 
