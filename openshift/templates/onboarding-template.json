@@ -23,7 +23,7 @@
       "description": "Git source URI for application",
       "displayName": "Git repository",
       "name": "GIT_URI",
-      "value": "https://github.com/lapd-viosoft/test",
+      "value": "https://github.com/TrongkhanhBkhn/microservice-test",
       "required": true
     },
     {

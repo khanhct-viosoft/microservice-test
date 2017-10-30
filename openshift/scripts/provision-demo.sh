@@ -119,9 +119,9 @@ PRJ_ONBOARD=onboarding-dev-$PRJ_SUFFIX
 PRJ_DEVELOPER=developer-$PRJ_SUFFIX
 
 # config
-GITHUB_ACCOUNT=${GITHUB_ACCOUNT:-lapd-viosoft}
+GITHUB_ACCOUNT=${GITHUB_ACCOUNT:-TrongkhanhBkhn}
 GITHUB_REF=master
-GITHUB_URI=https://github.com/$GITHUB_ACCOUNT/test.git
+GITHUB_URI=https://github.com/$GITHUB_ACCOUNT/microservice-test.git
 
 # maven
 MAVEN_MIRROR_URL=${ARG_MAVEN_MIRROR_URL:-http://nexus.$PRJ_CI.svc.cluster.local:8081/content/groups/public}
@@ -242,7 +242,7 @@ function add_onboarding_template_to_projects() {
   echo_header "Adding onboarding template to $PRJ_DEVELOPER project"
   local _TEMPLATE=https://raw.githubusercontent.com/$GITHUB_ACCOUNT/test/$GITHUB_REF/openshift/templates/onboarding-template.json
   curl -sL $_TEMPLATE | tr -d '\n' | tr -s '[:space:]' \
-    | sed "s|\"https://github.com/lapd-viosoft/test\"|\"http://$GOGS_ROUTE/$GOGS_USER/test.git\"|g" \
+    | sed "s|\"https://github.com/TrongkhanhBkhn/microservice-test\"|\"http://$GOGS_ROUTE/$GOGS_USER/test.git\"|g" \
     | oc create -f - -n $PRJ_DEVELOPER
 }
 
@@ -260,7 +260,7 @@ function deploy_gogs() {
   local _DB_USER=gogs
   local _DB_PASSWORD=gogs
   local _DB_NAME=gogs
-  local _GITHUB_REPO="https://github.com/$GITHUB_ACCOUNT/test.git"
+  local _GITHUB_REPO="https://github.com/$GITHUB_ACCOUNT/microservice-test.git"
 
   echo "Using template $_TEMPLATE"
   oc process -f $_TEMPLATE -v HOSTNAME=$GOGS_ROUTE -v GOGS_VERSION=0.9.113 -v DATABASE_USER=$_DB_USER -v DATABASE_PASSWORD=$_DB_PASSWORD -v DATABASE_NAME=$_DB_NAME -v SKIP_TLS_VERIFY=true -n $PRJ_CI | oc create -f - -n $PRJ_CI
