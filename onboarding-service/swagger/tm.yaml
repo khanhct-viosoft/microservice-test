@@ -1,0 +1,121 @@
+swagger: '2.0'
+info:
+  title: Validium Task Management API
+  version: "0.1"
+schemes:
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+security:
+  # enable OAuth protection for all REST endpoints
+  # (only active if the TOKENINFO_URL environment variable is set)
+  - oauth2: [uid]
+paths:
+  /tm/yardstick:
+    post:
+      tags: [TM]
+      operationId: api.handler.class_instance.post
+      summary: Upload Yaml file
+      consumes:
+        - multipart/form-data
+
+      parameters:
+        - name: yaml_file
+          in: formData
+          type: file
+          required: true
+
+      responses:
+        200:
+          description: Upload yaml file  successfully
+        400:
+          description: Cannot upload yaml file
+
+  /tm/non-yardstick:
+    post:
+      tags: [TM]
+      operationId: api.handler.class_instance.post1
+      summary: Upload Yaml file
+      consumes:
+        - multipart/form-data
+
+      parameters:
+        - name: yaml_file
+          in: formData
+          type: file
+          required: true
+
+      responses:
+        200:
+          description: Upload yaml file successfully
+        400:
+          description: Cannot upload yaml file
+
+  /tm/{task_id}:
+    get:
+      tags: [TM]
+      operationId: api.handler.class_instance.get
+      summary: Get a single user
+      parameters:
+        - $ref: '#/parameters/task_id'
+      responses:
+        200:
+          description: Return task information
+          schema:
+            $ref: '#/definitions/Task'
+        404:
+          description: Task does not exist
+
+parameters:
+  task_id:
+    name: task_id
+    description: Task's Unique identifier
+    in: path
+    type: string
+    required: true
+    pattern: "^[a-zA-Z0-9-]+$"
+
+definitions:
+  Task:
+    type: object
+    required:
+      - task_id
+      - context_id
+      - scenarios_id
+      - content
+    properties:
+      task_id:
+        type: string
+        description: Unique identifier
+        example: "VIO0000000000"
+        readOnly: true
+        minLength: 13
+        maxLength: 13
+      context_id:
+        type: string
+        description: Context's Unique identifier
+        example: "VIOCON0000000000"
+        minLength: 16
+        maxLength: 16
+      scenarios_id:
+        type: string
+        description: Scenarios's Unique identifier
+        example: "VIOSCE0000000000"
+        minLength: 16
+        maxLength: 16
+      content:
+        type: string
+        description: The Path of configure file
+        example: "/home/khanhct/.validium/yaml/cyclictest-node-context.yaml"
+        minLength: 1
+        maxLength: 255
+
+securityDefinitions:
+  oauth2:
+    type: oauth2
+    flow: implicit
+    authorizationUrl: https://example.com/oauth2/dialog
+    scopes:
+      uid: Unique identifier of the user accessing the service.
