@@ -6,4 +6,6 @@ ADD . /code/
 RUN pip install -r requirements.txt
 
 EXPOSE 9090
+
+USER 1000
 CMD ["python", "/code/app.py"]
