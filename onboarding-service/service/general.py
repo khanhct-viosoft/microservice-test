@@ -13,8 +13,8 @@ BANCHMARK_ADDR = '10.70.8.111'
 
 RABBITMQ_PORT = 5672
 
-#HOME_DIR = os.path.expanduser('~')
-HOME_DIR = ""
+HOME_DIR = os.path.expanduser('~')
+#HOME_DIR = ""
 RESOURCE_DIR = HOME_DIR + '/.validium'
 
 def generate_id_suffix(id):

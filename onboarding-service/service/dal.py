@@ -55,16 +55,9 @@ class DAL:
     def init():
         global conn
         global c
-        try:
-            conn = sqlite3.connect(tm_database)
-            c = conn.cursor()
-            DAL.create_database()
-        except Error as e:
-            if conn:
-                conn.close()
-            if c:
-                c.close()
-            logging.ERROR(e)
+        conn = sqlite3.connect(tm_database)
+        c = conn.cursor()
+        DAL.create_database()
 
     @staticmethod
     def create_database():
