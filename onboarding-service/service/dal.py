@@ -58,7 +58,6 @@ class DAL:
         conn = sqlite3.connect(tm_database)
         c = conn.cursor()
         DAL.create_database()
-
     @staticmethod
     def create_database():
         global c
